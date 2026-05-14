@@ -25,17 +25,18 @@ VIRTUALIZE_MARK(secret);
 Afterwards, run the virtualizer executable.
 ```bash
 code_virtualizer.exe <input.exe> <output.exe> auto
-
+```
 Example:
+```bash
 code_virtualizer.exe example.exe example_protected.exe auto
 ```
-Or, you if you want to virtualize specific segments of a binary without the SDK
+Or, you if you want to virtualize specific segments of a binary without the SDK:
 ```bash
 code_virtualizer.exe <input.exe> <output.exe> <start_rva> <function_size>
-
+```
 Example:
+```bash
 code_virtualizer.exe calc.exe calc_vmp.exe 0x1600 0x264
-
 ```
 
 # Dependencies
