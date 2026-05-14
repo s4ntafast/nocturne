@@ -41,10 +41,10 @@ code_virtualizer.exe calc.exe calc_vmp.exe 0x1600 0x264
 
 # Screenshots
 Call site modification:
-<img width="665" height="221" alt="image" src="https://github.com/user-attachments/assets/99ae811f-64e3-43b1-b2d9-562b03a922f2" />
+<img width="670" height="220" alt="image" src="https://github.com/user-attachments/assets/99ae811f-64e3-43b1-b2d9-562b03a922f2" />
 
 Obfuscated dispatcher loop:
-<img width="1210" height="667" alt="image" src="https://github.com/user-attachments/assets/fff1a19e-8d60-40ee-92c4-099fce60d1d9" />
+<img width="1200" height="600" alt="image" src="https://github.com/user-attachments/assets/fff1a19e-8d60-40ee-92c4-099fce60d1d9" />
 
 # Dependencies
 
