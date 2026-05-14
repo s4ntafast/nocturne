@@ -1,0 +1,22 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+struct symbol_info {
+	std::wstring decorated_name;
+	std::wstring undecorated_name;
+	uintptr_t start_rva;
+	uintptr_t end_rva;
+};
+
+class pdb_parser {
+public:
+	pdb_parser(std::string path);
+	void parse();
+	void print_info();
+
+private:
+	std::string pdb_path;
+	std::vector<symbol_info> info;
+};
