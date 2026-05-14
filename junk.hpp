@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
 
-#define DEBUG_MODE
+//#define DEBUG_MODE
+#define VM_BLOB_CODE_SECTION ".vmb$code"
 
 constexpr uint64_t get_seed() {
 	uint64_t seed = 0;
@@ -19,9 +20,9 @@ constexpr uint64_t get_random(uint64_t n) {
 template <int N>
 struct generator {
 #ifdef DEBUG_MODE
-    __forceinline __declspec(code_seg(".vmb$m")) static void generate_junk() { return; }
+    __forceinline __declspec(code_seg(VM_BLOB_CODE_SECTION)) static void generate_junk() { return; }
 #else
-	__forceinline __declspec(code_seg(".vmb$m")) static void generate_junk() {
+	__forceinline __declspec(code_seg(VM_BLOB_CODE_SECTION)) static void generate_junk() {
 		constexpr int branch = get_random(N) % 6;
 
         // you can add as many branches as you want with garbage
@@ -512,7 +513,7 @@ struct generator {
 
 template <>
 struct generator<0> {
-	__forceinline __declspec(code_seg(".vmb$m")) static void generate_junk() {
+	__forceinline __declspec(code_seg(VM_BLOB_CODE_SECTION)) static void generate_junk() {
 		// base case: do nothing
 	}
 };

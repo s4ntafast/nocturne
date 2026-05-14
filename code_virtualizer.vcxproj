@@ -42,6 +42,7 @@
     <ClInclude Include="assembly_dumper.hpp" />
     <ClInclude Include="common.hpp" />
     <ClInclude Include="junk.hpp" />
+    <ClInclude Include="nocturne_sdk.hpp" />
     <ClInclude Include="pdb.hpp" />
     <ClInclude Include="pe_patcher.hpp" />
     <ClInclude Include="register_mapper.hpp" />

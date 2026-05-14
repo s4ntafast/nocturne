@@ -68,5 +68,8 @@
     <ClInclude Include="junk.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="nocturne_sdk.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

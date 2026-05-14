@@ -8,6 +8,7 @@
 #include <intrin.h>
 
 #pragma section(".vmb$a", read, execute)
+#pragma section(".vmb$code", read, execute)
 #pragma section(".vmb$m", read, execute)
 #pragma section(".vmb$z", read, execute)
 #pragma comment(linker, "/SECTION:.vmb,ERW")
