@@ -40,8 +40,13 @@ code_virtualizer.exe calc.exe calc_vmp.exe 0x1600 0x264
 ```
 
 # Screenshots
-Call site modification:
-<img width="670" height="220" alt="image" src="https://github.com/user-attachments/assets/99ae811f-64e3-43b1-b2d9-562b03a922f2" />
+Before Virtualization:
+<img width="999" height="656" alt="image" src="https://github.com/user-attachments/assets/7b035cf6-b0e8-4db3-badf-0597e9a5bf33" />
+
+After Virtualization:
+
+<img width="633" height="230" alt="image" src="https://github.com/user-attachments/assets/bbeaa4d1-60d3-4001-9540-3ab6cc8230b3" />
+
 
 Obfuscated dispatcher loop:
 <img width="1200" height="600" alt="image" src="https://github.com/user-attachments/assets/fff1a19e-8d60-40ee-92c4-099fce60d1d9" />
