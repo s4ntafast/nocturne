@@ -58,5 +58,4 @@ Zydis
 ```
 
 # Disclaimer
-First and foremost, this is mostly a POC project. Please don't expect it to be **too** stable.
-I will be progressively adding more features to this as time goes on.
+First and foremost, this is mostly a POC project. Please don't expect it to be **too** stable. With that being said, I will be progressively adding more features/fixes to this as time goes on.
