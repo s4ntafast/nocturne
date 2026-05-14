@@ -1,5 +1,6 @@
 # nocturne
-Standalone PE code virtualizer / binary rewriter for x86-64.
+
+Named after one of my favorite games, "nocturne" is a bin2bin x86-64 PE code virtualizer and binary rewriter.
 
 # Features
 * Native Call Bridge
