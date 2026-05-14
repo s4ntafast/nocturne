@@ -52,8 +52,11 @@ Obfuscated dispatcher loop:
 <img width="1200" height="600" alt="image" src="https://github.com/user-attachments/assets/fff1a19e-8d60-40ee-92c4-099fce60d1d9" />
 
 # Dependencies
-
 ```
 LIEF
 Zydis
 ```
+
+# Disclaimer
+First and foremost, this is mostly a POC project. Please don't expect it to be **too** stable.
+I will be progressively adding more features to this as time goes on.
