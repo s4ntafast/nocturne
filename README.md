@@ -9,7 +9,7 @@ Named after one of my favorite games, "nocturne" is a bin2bin x86-64 PE code vir
 * Thread-safe per-invocation VM state
 
 # Usage
-To use the Nocturne virtualizer, copy and include "nocturne_sdk.hpp" into your project.
+To use the Nocturne virtualizer, copy and include "nocturne_sdk.hpp" from `core/` into your project.
 
 ```cpp
 #include "nocturne_sdk.hpp"
