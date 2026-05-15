@@ -25,19 +25,19 @@ VIRTUALIZE_MARK(secret);
 ```
 Afterwards, run the virtualizer executable.
 ```bash
-nocturne.exe <input.exe> <output.exe> auto
+cli.exe <input.exe> <output.exe> auto
 ```
 Example:
 ```bash
-nocturne.exe example.exe example_protected.exe auto
+cli.exe example.exe example_protected.exe auto
 ```
 Or, you if you want to virtualize specific segments of a binary without the SDK:
 ```bash
-nocturne.exe <input.exe> <output.exe> <start_rva> <function_size>
+cli.exe <input.exe> <output.exe> <start_rva> <function_size>
 ```
 Example:
 ```bash
-nocturne.exe calc.exe calc_vmp.exe 0x1600 0x264
+cli.exe calc.exe calc_vmp.exe 0x1600 0x264
 ```
 
 # Screenshots

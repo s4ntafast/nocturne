@@ -55,9 +55,9 @@ extern "C" __declspec(allocate(".vmb$m")) __declspec(align(16)) const uint8_t vm
 
 #define vm_inline __forceinline
 
-template<bool Enable>
+template<bool enable>
 vm_inline void vm_trace_helper(const char* fmt, ...) {
-    if constexpr (Enable) {
+    if constexpr (enable) {
         va_list args;
         va_start(args, fmt);
         std::vprintf(fmt, args);
@@ -417,7 +417,11 @@ vm_inline void vm_initialize_state_internal(vm_state& vm, uint8_t* code_buffer, 
     vm_reset_state_internal(vm);
 }
 
-template<bool TraceEnabled>
+/*
+    TODO: replace massive switch statement with a handler table + implement a better flag system
+*/
+
+template<bool trace_enabled>
 static vm_inline void run_vm_logic(vm_state& vm) {
     generator<500>::generate_junk();
 
@@ -457,477 +461,492 @@ static vm_inline void run_vm_logic(vm_state& vm) {
         ++instruction_count;
 
         generator<10>::generate_junk();
-        if (op == op_mov_imm) {
+
+        switch (op) {
+        case op_mov_imm:
             if (!ensure_code_bytes(vm, vm.ip, 9)) { vm.halted = true; }
             else {
                 uint8_t dst = 0;
                 uint64_t imm = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u64(vm, imm)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = imm;
-                    vm_trace_helper<TraceEnabled>("MOV_IMM r%u = 0x%llX\n", dst, imm);
-                }
+                    if (dst >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = imm;
+                        vm_trace_helper<trace_enabled>("MOV_IMM r%u = 0x%llX\n", dst, imm);
+                    }
             }
-        }
-        else if (op == op_mov_reg) {
+            break;
+        case op_mov_reg:
             if (!ensure_code_bytes(vm, vm.ip, 2)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, src = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, src)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = vm.regs[src];
-                    vm_trace_helper<TraceEnabled>("MOV_REG r%u = r%u (0x%llX)\n", dst, src, vm.regs[src]);
-                }
+                    if (dst >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[src];
+                        vm_trace_helper<trace_enabled>("MOV_REG r%u = r%u (0x%llX)\n", dst, src, vm.regs[src]);
+                    }
             }
-        }
-        else if (op == op_add) {
+            break;
+        case op_add:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = vm.regs[a] + vm.regs[b];
-                    vm_trace_helper<TraceEnabled>("ADD r%u = r%u + r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[a] + vm.regs[b];
+                        vm_trace_helper<trace_enabled>("ADD r%u = r%u + r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_sub) {
+            break;
+        case op_sub:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = vm.regs[a] - vm.regs[b];
-                    vm_trace_helper<TraceEnabled>("SUB r%u = r%u - r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[a] - vm.regs[b];
+                        vm_trace_helper<trace_enabled>("SUB r%u = r%u - r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_and) {
+            break;
+        case op_mul:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = vm.regs[a] & vm.regs[b];
-                    vm_trace_helper<TraceEnabled>("AND r%u = r%u & r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[a] * vm.regs[b];
+                        vm_trace_helper<trace_enabled>("MUL r%u = r%u * r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_or) {
+            break;
+        case op_div:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = vm.regs[a] | vm.regs[b];
-                    vm_trace_helper<TraceEnabled>("OR r%u = r%u | r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        if (vm.regs[b] == 0) { vm.halted = true; }
+                        else {
+                            vm.regs[dst] = vm.regs[a] / vm.regs[b];
+                            vm_trace_helper<trace_enabled>("DIV r%u = r%u / r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                        }
+                    }
             }
-        }
-        else if (op == op_xor) {
+            break;
+        case op_and:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = vm.regs[a] ^ vm.regs[b];
-                    vm_trace_helper<TraceEnabled>("XOR r%u = r%u ^ r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[a] & vm.regs[b];
+                        vm_trace_helper<trace_enabled>("AND r%u = r%u & r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_not) {
+            break;
+        case op_or:
+            if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
+            else {
+                uint8_t dst = 0, a = 0, b = 0;
+                if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
+                else
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[a] | vm.regs[b];
+                        vm_trace_helper<trace_enabled>("OR r%u = r%u | r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
+            }
+            break;
+        case op_xor:
+            if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
+            else {
+                uint8_t dst = 0, a = 0, b = 0;
+                if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
+                else
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = vm.regs[a] ^ vm.regs[b];
+                        vm_trace_helper<trace_enabled>("XOR r%u = r%u ^ r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
+            }
+            break;
+        case op_not:
             if (!ensure_code_bytes(vm, vm.ip, 2)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, src = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, src)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
-                else {
-                    vm.regs[dst] = ~vm.regs[src];
-                    vm_trace_helper<TraceEnabled>("NOT r%u = ~r%u = 0x%llX\n", dst, src, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
+                    else {
+                        vm.regs[dst] = ~vm.regs[src];
+                        vm_trace_helper<trace_enabled>("NOT r%u = ~r%u = 0x%llX\n", dst, src, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_shl) {
+            break;
+        case op_shr:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t shift = vm.regs[b] & 0x3F;
-                    vm.regs[dst] = vm.regs[a] << shift;
-                    vm_trace_helper<TraceEnabled>("SHL r%u = r%u << r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        uint64_t shift = vm.regs[b] & 0x3F;
+                        vm.regs[dst] = vm.regs[a] >> shift;
+                        vm_trace_helper<trace_enabled>("SHR r%u = r%u >> r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_shr) {
+            break;
+        case op_shl:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t shift = vm.regs[b] & 0x3F;
-                    vm.regs[dst] = vm.regs[a] >> shift;
-                    vm_trace_helper<TraceEnabled>("SHR r%u = r%u >> r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        uint64_t shift = vm.regs[b] & 0x3F;
+                        vm.regs[dst] = vm.regs[a] << shift;
+                        vm_trace_helper<trace_enabled>("SHL r%u = r%u << r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_sar) {
+            break;
+        case op_sar:
             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, a = 0, b = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t shift = vm.regs[b] & 0x3F;
-                    int64_t value = static_cast<int64_t>(vm.regs[a]);
-                    vm.regs[dst] = static_cast<uint64_t>(value >> shift);
-                    vm_trace_helper<TraceEnabled>("SAR r%u = r%u >> r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                }
+                    if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        uint64_t shift = vm.regs[b] & 0x3F;
+                        int64_t value = static_cast<int64_t>(vm.regs[a]);
+                        vm.regs[dst] = static_cast<uint64_t>(value >> shift);
+                        vm_trace_helper<trace_enabled>("SAR r%u = r%u >> r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
+                    }
             }
-        }
-        else if (op == op_mul) {
-             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
-             else {
-                 uint8_t dst = 0, a = 0, b = 0;
-                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
-                 else
-                 if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                 else {
-                     vm.regs[dst] = vm.regs[a] * vm.regs[b];
-                     vm_trace_helper<TraceEnabled>("MUL r%u = r%u * r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                 }
-             }
-        }
-        else if (op == op_div) {
-             if (!ensure_code_bytes(vm, vm.ip, 3)) { vm.halted = true; }
-             else {
-                 uint8_t dst = 0, a = 0, b = 0;
-                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
-                 else
-                 if (dst >= vm_register_count || a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                 else {
-                     if (vm.regs[b] == 0) { vm.halted = true; }
-                     else {
-                         vm.regs[dst] = vm.regs[a] / vm.regs[b];
-                         vm_trace_helper<TraceEnabled>("DIV r%u = r%u / r%u = 0x%llX\n", dst, a, b, vm.regs[dst]);
-                     }
-                 }
-             }
-        }
-        else if (op == op_cmp) {
+            break;
+        case op_cmp:
             if (!ensure_code_bytes(vm, vm.ip, 2)) { vm.halted = true; }
             else {
                 uint8_t a = 0, b = 0;
                 if (!fetch_code_u8(vm, a) || !fetch_code_u8(vm, b)) { vm.halted = true; }
                 else
-                if (a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t va = vm.regs[a];
-                    uint64_t vb = vm.regs[b];
-                    zero_flag = (va == vb);
-                    less_flag = (va < vb);
-                    greater_flag = (va > vb);
-                    vm_trace_helper<TraceEnabled>("CMP r%u (0x%llX) vs r%u (0x%llX) -> Z:%d L:%d G:%d\n", a, va, b, vb, zero_flag, less_flag, greater_flag);
-                }
+                    if (a >= vm_register_count || b >= vm_register_count) { vm.halted = true; }
+                    else {
+                        uint64_t va = vm.regs[a];
+                        uint64_t vb = vm.regs[b];
+                        zero_flag = (va == vb);
+                        less_flag = (va < vb);
+                        greater_flag = (va > vb);
+                        vm_trace_helper<trace_enabled>("CMP r%u (0x%llX) vs r%u (0x%llX) -> Z:%d L:%d G:%d\n", a, va, b, vb, zero_flag, less_flag, greater_flag);
+                    }
             }
-        }
-        else if (op == op_jmp || op == op_jz || op == op_jnz || op == op_jl || op == op_jg || op == op_jle || op == op_jge) {
+            break;
+        case op_jmp: 
+        case op_jz: 
+        case op_jnz:
+        case op_jl: 
+        case op_jg: 
+        case op_jle: 
+        case op_jge:
             if (!ensure_code_bytes(vm, vm.ip, 4)) { vm.halted = true; }
             else {
                 int32_t offset = 0;
                 if (!fetch_code_i32(vm, offset)) { vm.halted = true; }
                 else {
-                uint32_t target = static_cast<uint32_t>(static_cast<int64_t>(vm.ip) + offset);
-                bool take = false;
-                if (op == op_jmp) take = true;
-                else if (op == op_jz)  take = zero_flag;
-                else if (op == op_jnz) take = !zero_flag;
-                else if (op == op_jl)  take = less_flag;
-                else if (op == op_jg)  take = greater_flag;
-                else if (op == op_jle) take = less_flag || zero_flag;
-                else if (op == op_jge) take = greater_flag || zero_flag;
-                
-                if (take) {
-                    if (target > vm.code_size) { vm.halted = true; }
-                    else {
-                        vm.ip = target;
-                        vm_trace_helper<TraceEnabled>("JUMP TAKEN to %u\n", vm.ip);
+                    uint32_t target = static_cast<uint32_t>(static_cast<int64_t>(vm.ip) + offset);
+                    bool take = false;
+                    if (op == op_jmp) take = true;
+                    else if (op == op_jz)  take = zero_flag;
+                    else if (op == op_jnz) take = !zero_flag;
+                    else if (op == op_jl)  take = less_flag;
+                    else if (op == op_jg)  take = greater_flag;
+                    else if (op == op_jle) take = less_flag || zero_flag;
+                    else if (op == op_jge) take = greater_flag || zero_flag;
+
+                    if (take) {
+                        if (target > vm.code_size) { vm.halted = true; }
+                        else {
+                            vm.ip = target;
+                            vm_trace_helper<trace_enabled>("JUMP TAKEN to %u\n", vm.ip);
+                        }
                     }
-                } else {
-                    vm_trace_helper<TraceEnabled>("JUMP NOT TAKEN\n");
-                }
+                    else {
+                        vm_trace_helper<trace_enabled>("JUMP NOT TAKEN\n");
+                    }
                 }
             }
-        }
-        else if (op == op_push) {
+            break;
+        case op_push:
             if (!ensure_code_bytes(vm, vm.ip, 1)) { vm.halted = true; }
             else {
                 uint8_t src = 0;
                 if (!fetch_code_u8(vm, src)) { vm.halted = true; }
                 else
-                if (src >= vm_register_count || VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
-                    if (!ensure_stack_space(vm, sp, 8)) { vm.halted = true; }
+                    if (src >= vm_register_count || VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
                     else {
-                        sp -= 8;
-                        write_u64_le(vm_memory_ptr(vm, sp, 8), vm.regs[src]);
-                        vm_trace_helper<TraceEnabled>("PUSH r%u (0x%llX) -> [RSP]=0x%llX\n", src, vm.regs[src], sp);
+                        uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
+                        if (!ensure_stack_space(vm, sp, 8)) { vm.halted = true; }
+                        else {
+                            sp -= 8;
+                            write_u64_le(vm_memory_ptr(vm, sp, 8), vm.regs[src]);
+                            vm_trace_helper<trace_enabled>("PUSH r%u (0x%llX) -> [RSP]=0x%llX\n", src, vm.regs[src], sp);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_pop) {
+            break;
+        case op_pop:
             if (!ensure_code_bytes(vm, vm.ip, 1)) { vm.halted = true; }
             else {
                 uint8_t dst = 0;
                 if (!fetch_code_u8(vm, dst)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
-                    if (!ensure_stack_read(vm, sp, 8)) { vm.halted = true; }
+                    if (dst >= vm_register_count || VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
                     else {
-                        uint64_t value = read_u64_le(vm_memory_ptr(vm, sp, 8));
-                        sp += 8;
-                        vm.regs[dst] = value;
-                        vm_trace_helper<TraceEnabled>("POP -> r%u = 0x%llX (from [RSP]=0x%llX)\n", dst, value, sp);
+                        uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
+                        if (!ensure_stack_read(vm, sp, 8)) { vm.halted = true; }
+                        else {
+                            uint64_t value = read_u64_le(vm_memory_ptr(vm, sp, 8));
+                            sp += 8;
+                            vm.regs[dst] = value;
+                            vm_trace_helper<trace_enabled>("POP -> r%u = 0x%llX (from [RSP]=0x%llX)\n", dst, value, sp);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_call) {
+            break;
+        case op_call:
             if (!ensure_code_bytes(vm, vm.ip, 4)) { vm.halted = true; }
             else {
                 int32_t offset = 0;
                 if (!fetch_code_i32(vm, offset)) { vm.halted = true; }
                 else {
-                uint64_t return_addr = static_cast<uint64_t>(vm.ip);
-                if (VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
-                    if (!ensure_stack_space(vm, sp, 8)) { vm.halted = true; }
+                    uint64_t return_addr = static_cast<uint64_t>(vm.ip);
+                    if (VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
                     else {
-                        sp -= 8;
-                        write_u64_le(vm_memory_ptr(vm, sp, 8), return_addr);
-                        uint32_t target = static_cast<uint32_t>(static_cast<int64_t>(vm.ip) + offset);
-                        if (target > vm.code_size) { vm.halted = true; }
+                        uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
+                        if (!ensure_stack_space(vm, sp, 8)) { vm.halted = true; }
                         else {
-                            vm.ip = target;
-                            vm_trace_helper<TraceEnabled>("CALL -> return %llu, target %u\n", return_addr, target);
+                            sp -= 8;
+                            write_u64_le(vm_memory_ptr(vm, sp, 8), return_addr);
+                            uint32_t target = static_cast<uint32_t>(static_cast<int64_t>(vm.ip) + offset);
+                            if (target > vm.code_size) { vm.halted = true; }
+                            else {
+                                vm.ip = target;
+                                vm_trace_helper<trace_enabled>("CALL -> return %llu, target %u\n", return_addr, target);
+                            }
                         }
                     }
                 }
-                }
             }
-        }
-        else if (op == op_load_mem) {
+            break;
+        case op_load_mem:
             if (!ensure_code_bytes(vm, vm.ip, 6)) { vm.halted = true; }
             else {
                 uint8_t dst = 0, base = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, dst) || !fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset)) { vm.halted = true; }
                 else
-                if (dst >= vm_register_count || base >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (addr < 0) { vm.halted = true; }
-                    else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
-                        vm.regs[dst] = read_u64_le(vm_ptr);
-                        vm_trace_helper<TraceEnabled>("LOAD_MEM r%u = [r%u + %d] -> 0x%llX\n", dst, base, offset, vm.regs[dst]);
-                    } else {
-                        auto* ptr = reinterpret_cast<const uint8_t*>(static_cast<uint64_t>(addr));
-                        vm.regs[dst] = read_u64_le(ptr);
-                        vm_trace_helper<TraceEnabled>("LOAD_MEM (native) r%u = [0x%llX] -> 0x%llX\n", dst, static_cast<uint64_t>(addr), vm.regs[dst]);
+                    if (dst >= vm_register_count || base >= vm_register_count) { vm.halted = true; }
+                    else {
+                        int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (addr < 0) { vm.halted = true; }
+                        else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
+                            vm.regs[dst] = read_u64_le(vm_ptr);
+                            vm_trace_helper<trace_enabled>("LOAD_MEM r%u = [r%u + %d] -> 0x%llX\n", dst, base, offset, vm.regs[dst]);
+                        }
+                        else {
+                            auto* ptr = reinterpret_cast<const uint8_t*>(static_cast<uint64_t>(addr));
+                            vm.regs[dst] = read_u64_le(ptr);
+                            vm_trace_helper<trace_enabled>("LOAD_MEM (native) r%u = [0x%llX] -> 0x%llX\n", dst, static_cast<uint64_t>(addr), vm.regs[dst]);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_store_mem) {
+            break;
+        case op_store_mem:
             if (!ensure_code_bytes(vm, vm.ip, 6)) { vm.halted = true; }
             else {
                 uint8_t base = 0, src = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset) || !fetch_code_u8(vm, src)) { vm.halted = true; }
                 else
-                if (base >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (addr < 0) { vm.halted = true; }
-                    else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
-                        write_u64_le(vm_ptr, vm.regs[src]);
-                        vm_trace_helper<TraceEnabled>("STORE_MEM [r%u + %d] = r%u (0x%llX)\n", base, offset, src, vm.regs[src]);
-                    } else {
-                        auto* ptr = reinterpret_cast<uint8_t*>(static_cast<uint64_t>(addr));
-                        write_u64_le(ptr, vm.regs[src]);
-                        vm_trace_helper<TraceEnabled>("STORE_MEM (native) [0x%llX] = r%u (0x%llX)\n", static_cast<uint64_t>(addr), src, vm.regs[src]);
+                    if (base >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
+                    else {
+                        int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (addr < 0) { vm.halted = true; }
+                        else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
+                            write_u64_le(vm_ptr, vm.regs[src]);
+                            vm_trace_helper<trace_enabled>("STORE_MEM [r%u + %d] = r%u (0x%llX)\n", base, offset, src, vm.regs[src]);
+                        }
+                        else {
+                            auto* ptr = reinterpret_cast<uint8_t*>(static_cast<uint64_t>(addr));
+                            write_u64_le(ptr, vm.regs[src]);
+                            vm_trace_helper<trace_enabled>("STORE_MEM (native) [0x%llX] = r%u (0x%llX)\n", static_cast<uint64_t>(addr), src, vm.regs[src]);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_store_mem8) {
+            break;
+        case op_store_mem8:
             if (!ensure_code_bytes(vm, vm.ip, 6)) { vm.halted = true; }
             else {
                 uint8_t base = 0, src = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset) || !fetch_code_u8(vm, src)) { vm.halted = true; }
                 else
-                if (base >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (addr < 0) { vm.halted = true; }
-                    else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 1)) {
-                        *vm_ptr = static_cast<uint8_t>(vm.regs[src] & 0xFF);
-                        vm_trace_helper<TraceEnabled>("STORE_MEM8 [r%u + %d] = r%u low8\n", base, offset, src);
-                    } else {
-                        auto* ptr = reinterpret_cast<uint8_t*>(static_cast<uint64_t>(addr));
-                        *ptr = static_cast<uint8_t>(vm.regs[src] & 0xFF);
-                        vm_trace_helper<TraceEnabled>("STORE_MEM8 (native) [0x%llX] = r%u low8\n", static_cast<uint64_t>(addr), src);
+                    if (base >= vm_register_count || src >= vm_register_count) { vm.halted = true; }
+                    else {
+                        int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (addr < 0) { vm.halted = true; }
+                        else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 1)) {
+                            *vm_ptr = static_cast<uint8_t>(vm.regs[src] & 0xFF);
+                            vm_trace_helper<trace_enabled>("STORE_MEM8 [r%u + %d] = r%u low8\n", base, offset, src);
+                        }
+                        else {
+                            auto* ptr = reinterpret_cast<uint8_t*>(static_cast<uint64_t>(addr));
+                            *ptr = static_cast<uint8_t>(vm.regs[src] & 0xFF);
+                            vm_trace_helper<trace_enabled>("STORE_MEM8 (native) [0x%llX] = r%u low8\n", static_cast<uint64_t>(addr), src);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_store_mem_zero128) {
+            break;
+        case op_store_mem_zero128:
             if (!ensure_code_bytes(vm, vm.ip, 5)) { vm.halted = true; }
             else {
                 uint8_t base = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset)) { vm.halted = true; }
                 else
-                if (base >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (addr < 0) { vm.halted = true; }
-                    else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 16)) {
-                        for (uint32_t i = 0; i < 16; ++i) {
-                            vm_ptr[i] = 0;
+                    if (base >= vm_register_count) { vm.halted = true; }
+                    else {
+                        int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (addr < 0) { vm.halted = true; }
+                        else if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 16)) {
+                            for (uint32_t i = 0; i < 16; ++i) {
+                                vm_ptr[i] = 0;
+                            }
+                            vm_trace_helper<trace_enabled>("STORE_MEM_ZERO128 [r%u + %d]\n", base, offset);
                         }
-                        vm_trace_helper<TraceEnabled>("STORE_MEM_ZERO128 [r%u + %d]\n", base, offset);
-                    } else {
-                        auto* ptr = reinterpret_cast<uint8_t*>(static_cast<uint64_t>(addr));
-                        for (uint32_t i = 0; i < 16; ++i) {
-                            ptr[i] = 0;
+                        else {
+                            auto* ptr = reinterpret_cast<uint8_t*>(static_cast<uint64_t>(addr));
+                            for (uint32_t i = 0; i < 16; ++i) {
+                                ptr[i] = 0;
+                            }
+                            vm_trace_helper<trace_enabled>("STORE_MEM_ZERO128 (native) [0x%llX]\n", static_cast<uint64_t>(addr));
                         }
-                        vm_trace_helper<TraceEnabled>("STORE_MEM_ZERO128 (native) [0x%llX]\n", static_cast<uint64_t>(addr));
                     }
-                }
             }
-        }
-        else if (op == op_call_native) {
+            break;
+        case op_call_native:
             if (!ensure_code_bytes(vm, vm.ip, 8)) { vm.halted = true; }
             else {
                 uint64_t target = 0;
                 if (!fetch_code_u64(vm, target)) { vm.halted = true; }
                 else {
 
-                uint64_t actual = target;
-                if (vm.image_base != 0 && vm.image_size != 0 && target < vm.image_size) {
-                    actual = vm.image_base + target;
-                }
+                    uint64_t actual = target;
+                    if (vm.image_base != 0 && vm.image_size != 0 && target < vm.image_size) {
+                        actual = vm.image_base + target;
+                    }
 
-                uint64_t ret = call_native_bridge(actual, vm);
-                vm.regs[0] = ret;
-                vm_trace_helper<TraceEnabled>("CALL_NATIVE 0x%llX -> r0 = 0x%llX\n", actual, ret);
+                    uint64_t ret = call_native_bridge(actual, vm);
+                    vm.regs[0] = ret;
+                    vm_trace_helper<trace_enabled>("CALL_NATIVE 0x%llX -> r0 = 0x%llX\n", actual, ret);
                 }
             }
-        }
-        else if (op == op_cmpxchg_mem64) {
+            break;
+        case op_cmpxchg_mem64:
             if (!ensure_code_bytes(vm, vm.ip, 6)) { vm.halted = true; }
             else {
                 uint8_t base = 0, src = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset) || !fetch_code_u8(vm, src)) { vm.halted = true; }
                 else
-                if (base >= vm_register_count || src >= vm_register_count || VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (addr < 0) { vm.halted = true; }
+                    if (base >= vm_register_count || src >= vm_register_count || VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
                     else {
-                        uint64_t expected = vm.regs[0];
-                        uint64_t desired = vm.regs[src];
-                        uint64_t old = 0;
+                        int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (addr < 0) { vm.halted = true; }
+                        else {
+                            uint64_t expected = vm.regs[0];
+                            uint64_t desired = vm.regs[src];
+                            uint64_t old = 0;
 
-                        if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
-                            old = read_u64_le(vm_ptr);
-                            if (old == expected) {
-                                write_u64_le(vm_ptr, desired);
+                            if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
+                                old = read_u64_le(vm_ptr);
+                                if (old == expected) {
+                                    write_u64_le(vm_ptr, desired);
+                                }
                             }
-                        } else {
-                            auto* ptr = reinterpret_cast<volatile long long*>(static_cast<uint64_t>(addr));
-                            old = static_cast<uint64_t>(_InterlockedCompareExchange64(
-                                ptr,
-                                static_cast<long long>(desired),
-                                static_cast<long long>(expected)));
-                        }
+                            else {
+                                auto* ptr = reinterpret_cast<volatile long long*>(static_cast<uint64_t>(addr));
+                                old = static_cast<uint64_t>(_InterlockedCompareExchange64(
+                                    ptr,
+                                    static_cast<long long>(desired),
+                                    static_cast<long long>(expected)));
+                            }
 
-                        zero_flag = (old == expected);
-                        less_flag = (expected < old);
-                        greater_flag = (expected > old);
-                        if (!zero_flag) {
-                            vm.regs[0] = old;
-                        }
+                            zero_flag = (old == expected);
+                            less_flag = (expected < old);
+                            greater_flag = (expected > old);
+                            if (!zero_flag) {
+                                vm.regs[0] = old;
+                            }
 
-                        vm_trace_helper<TraceEnabled>(
-                            "CMPXCHG_MEM64 [r%u + %d], r%u expected=0x%llX old=0x%llX Z:%d\n",
-                            base, offset, src, expected, old, zero_flag);
+                            vm_trace_helper<trace_enabled>(
+                                "CMPXCHG_MEM64 [r%u + %d], r%u expected=0x%llX old=0x%llX Z:%d\n",
+                                base, offset, src, expected, old, zero_flag);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_xchg_mem64) {
+            break;
+        case op_xchg_mem64:
             if (!ensure_code_bytes(vm, vm.ip, 6)) { vm.halted = true; }
             else {
                 uint8_t base = 0, reg = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset) || !fetch_code_u8(vm, reg)) { vm.halted = true; }
                 else
-                if (base >= vm_register_count || reg >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (addr < 0) { vm.halted = true; }
+                    if (base >= vm_register_count || reg >= vm_register_count) { vm.halted = true; }
                     else {
-                        uint64_t desired = vm.regs[reg];
-                        uint64_t old = 0;
+                        int64_t addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (addr < 0) { vm.halted = true; }
+                        else {
+                            uint64_t desired = vm.regs[reg];
+                            uint64_t old = 0;
 
-                        if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
-                            old = read_u64_le(vm_ptr);
-                            write_u64_le(vm_ptr, desired);
-                        } else {
-                            auto* ptr = reinterpret_cast<volatile long long*>(static_cast<uint64_t>(addr));
-                            old = static_cast<uint64_t>(_InterlockedExchange64(
-                                ptr,
-                                static_cast<long long>(desired)));
+                            if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(addr), 8)) {
+                                old = read_u64_le(vm_ptr);
+                                write_u64_le(vm_ptr, desired);
+                            }
+                            else {
+                                auto* ptr = reinterpret_cast<volatile long long*>(static_cast<uint64_t>(addr));
+                                old = static_cast<uint64_t>(_InterlockedExchange64(
+                                    ptr,
+                                    static_cast<long long>(desired)));
+                            }
+
+                            vm.regs[reg] = old;
+                            vm_trace_helper<trace_enabled>(
+                                "XCHG_MEM64 [r%u + %d], r%u old=0x%llX new=0x%llX\n",
+                                base, offset, reg, old, desired);
                         }
-
-                        vm.regs[reg] = old;
-                        vm_trace_helper<TraceEnabled>(
-                            "XCHG_MEM64 [r%u + %d], r%u old=0x%llX new=0x%llX\n",
-                            base, offset, reg, old, desired);
                     }
-                }
             }
-        }
-        else if (op == op_call_native_indirect) {
+            break;
+        case op_call_native_indirect:
             if (!ensure_code_bytes(vm, vm.ip, 8)) { vm.halted = true; }
             else {
                 uint64_t target_slot = 0;
@@ -941,85 +960,87 @@ static vm_inline void run_vm_logic(vm_state& vm) {
                     uint64_t target = read_u64_le(reinterpret_cast<const uint8_t*>(static_cast<uintptr_t>(actual_slot)));
                     uint64_t ret = call_native_bridge(target, vm);
                     vm.regs[0] = ret;
-                    vm_trace_helper<TraceEnabled>("CALL_NATIVE_INDIRECT [0x%llX] -> r0 = 0x%llX\n", actual_slot, ret);
+                    vm_trace_helper<trace_enabled>("CALL_NATIVE_INDIRECT [0x%llX] -> r0 = 0x%llX\n", actual_slot, ret);
                 }
             }
-        }
-        else if (op == op_call_native_mem) {
+            break;
+        case op_call_native_mem:
             if (!ensure_code_bytes(vm, vm.ip, 5)) { vm.halted = true; }
             else {
                 uint8_t base = 0;
                 int32_t offset = 0;
                 if (!fetch_code_u8(vm, base) || !fetch_code_i32(vm, offset)) { vm.halted = true; }
                 else
-                if (base >= vm_register_count) { vm.halted = true; }
-                else {
-                    int64_t slot_addr = static_cast<int64_t>(vm.regs[base]) + offset;
-                    if (slot_addr < 0) { vm.halted = true; }
+                    if (base >= vm_register_count) { vm.halted = true; }
                     else {
-                        uint64_t target = 0;
-                        if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(slot_addr), 8)) {
-                            target = read_u64_le(vm_ptr);
-                        } else {
-                            target = read_u64_le(reinterpret_cast<const uint8_t*>(static_cast<uint64_t>(slot_addr)));
-                        }
+                        int64_t slot_addr = static_cast<int64_t>(vm.regs[base]) + offset;
+                        if (slot_addr < 0) { vm.halted = true; }
+                        else {
+                            uint64_t target = 0;
+                            if (uint8_t* vm_ptr = vm_memory_ptr(vm, static_cast<uint64_t>(slot_addr), 8)) {
+                                target = read_u64_le(vm_ptr);
+                            }
+                            else {
+                                target = read_u64_le(reinterpret_cast<const uint8_t*>(static_cast<uint64_t>(slot_addr)));
+                            }
 
-                        uint64_t ret = call_native_bridge(target, vm);
-                        vm.regs[0] = ret;
-                        vm_trace_helper<TraceEnabled>("CALL_NATIVE_MEM [r%u + %d] -> r0 = 0x%llX\n", base, offset, ret);
+                            uint64_t ret = call_native_bridge(target, vm);
+                            vm.regs[0] = ret;
+                            vm_trace_helper<trace_enabled>("CALL_NATIVE_MEM [r%u + %d] -> r0 = 0x%llX\n", base, offset, ret);
+                        }
                     }
-                }
             }
-        }
-        else if (op == op_call_native_reg) {
+            break;
+        case op_call_native_reg:
             if (!ensure_code_bytes(vm, vm.ip, 1)) { vm.halted = true; }
             else {
                 uint8_t target_reg = 0;
                 if (!fetch_code_u8(vm, target_reg)) { vm.halted = true; }
                 else
-                if (target_reg >= vm_register_count) { vm.halted = true; }
-                else {
-                    uint64_t target = vm.regs[target_reg];
-                    if (vm.image_base != 0 && vm.image_size != 0 && target < vm.image_size) {
-                        target += vm.image_base;
-                    }
+                    if (target_reg >= vm_register_count) { vm.halted = true; }
+                    else {
+                        uint64_t target = vm.regs[target_reg];
+                        if (vm.image_base != 0 && vm.image_size != 0 && target < vm.image_size) {
+                            target += vm.image_base;
+                        }
 
-                    uint64_t ret = call_native_bridge(target, vm);
-                    vm.regs[0] = ret;
-                    vm_trace_helper<TraceEnabled>("CALL_NATIVE_REG r%u=0x%llX -> r0 = 0x%llX\n", target_reg, target, ret);
-                }
+                        uint64_t ret = call_native_bridge(target, vm);
+                        vm.regs[0] = ret;
+                        vm_trace_helper<trace_enabled>("CALL_NATIVE_REG r%u=0x%llX -> r0 = 0x%llX\n", target_reg, target, ret);
+                    }
             }
-        }
-        else if (op == op_ret) {
+            break;
+        case op_ret:
             if (VM_REG_INDEX_RSP >= vm_register_count) { vm.halted = true; }
             else {
-                    uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
-                    if (!ensure_stack_read(vm, sp, 8)) {
-                        vm.halted = true;
-                    }
-                    else {
+                uint64_t& sp = vm.regs[VM_REG_INDEX_RSP];
+                if (!ensure_stack_read(vm, sp, 8)) {
+                    vm.halted = true;
+                }
+                else {
                     uint64_t return_addr = read_u64_le(vm_memory_ptr(vm, sp, 8));
                     sp += 8;
                     if (return_addr > vm.code_size) { vm.halted = true; }
                     else {
                         vm.ip = static_cast<uint32_t>(return_addr);
-                        vm_trace_helper<TraceEnabled>("RET to %u\n", vm.ip);
+                        vm_trace_helper<trace_enabled>("RET to %u\n", vm.ip);
                     }
                 }
             }
-        }
-        else if (op == op_halt) {
+            break;
+        case op_halt:
             vm.halted = true;
-            vm_trace_helper<TraceEnabled>("HALT\n");
-        }
-        else {
+            vm_trace_helper<trace_enabled>("HALT\n");
+            break;
+        default:
             vm.halted = true;
-            vm_trace_helper<TraceEnabled>("UNKNOWN OPCODE 0x%02X\n", op);
+            vm_trace_helper<trace_enabled>("UNKNOWN OPCODE: 0x%02X\n", op);
+            break;
         }
     }
 
     if (instruction_count >= MAX_INSTRUCTIONS) {
-        vm_trace_helper<TraceEnabled>("*** EXECUTION STOPPED: instruction limit reached (%d) ***\n", MAX_INSTRUCTIONS);
+        vm_trace_helper<trace_enabled>("*** EXECUTION STOPPED: instruction limit reached (%d) ***\n", MAX_INSTRUCTIONS);
     }
 }
 
