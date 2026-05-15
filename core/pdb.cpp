@@ -26,7 +26,6 @@ namespace {
 pdb_parser::pdb_parser(std::string path) : pdb_path(path) {}
 
 void pdb_parser::parse() {
-	// Release DIA COM pointers before CoUninitialize.
 	{
 		if (FAILED(CoInitialize(NULL))) {
 			std::println("[-] Failed to initialize COM library.");

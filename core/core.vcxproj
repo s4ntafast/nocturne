@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="assembly_dumper.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="pdb.cpp" />
     <ClCompile Include="pe_patcher.cpp" />
     <ClCompile Include="register_mapper.cpp" />
