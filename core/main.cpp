@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+
 #include "common.hpp"
 #include "assembly_dumper.hpp"
 #include "x86_to_vm_translator.hpp"
@@ -142,54 +143,54 @@ void test_advanced_features() {
     }
 }
 
-int main(int argc, char* argv[]) {
-    uint8_t* blob_ptr = reinterpret_cast<uint8_t*>(&run_vm_from_blob);
-    printf("DEBUG: run_vm_from_blob at %p\n", blob_ptr);
-    printf("DEBUG: Bytes: ");
-    for(int i=0; i<32; i++) printf("%02X ", blob_ptr[i]);
-    printf("\n");
-    if(blob_ptr[0] == 0xE9) {
-        int32_t rel = *reinterpret_cast<int32_t*>(blob_ptr + 1);
-        printf("DEBUG: Thunk detected! JMP relative %d. Target: %p\n", rel, blob_ptr + 5 + rel);
-    }
-
-    if (argc >= 4) {
-        std::string input_pe = argv[1];
-        std::string output_pe = argv[2];
-        uint32_t rva = 0;
-        uint32_t size = 0x50;
-
-        try {
-            std::string mode_or_rva = argv[3];
-            if (mode_or_rva == "auto" || mode_or_rva == "markers") {
-                size = 0;
-            } else {
-                rva = std::stoul(mode_or_rva, nullptr, 16);
-                if (argc >= 5) {
-                    size = std::stoul(argv[4], nullptr, 16);
-                }
-            }
-
-            printf("Virtualizing %s -> %s\n", input_pe.c_str(), output_pe.c_str());
-            if (rva == 0 && size == 0) {
-                printf("Target mode: marker scan\n");
-            } else {
-                printf("Target Function RVA: 0x%X, Size: 0x%X\n", rva, size);
-            }
-
-            pe_patcher patcher(input_pe, output_pe, rva, size);
-        }
-        catch (const std::exception& e) {
-            printf("Error: %s\n", e.what());
-            return 1;
-        }
-    }
-    else {
-        printf("Usage: code_virtualizer.exe <input_pe> <output_pe> <rva_hex> [size_hex]\n");
-        printf("   or: code_virtualizer.exe <input_pe> <output_pe> auto\n");
-        printf("Running internal tests...\n");
-        test_advanced_features();
-    }
-    return 0;
-}
+//int main(int argc, char* argv[]) {
+//    uint8_t* blob_ptr = reinterpret_cast<uint8_t*>(&run_vm_from_blob);
+//    printf("DEBUG: run_vm_from_blob at %p\n", blob_ptr);
+//    printf("DEBUG: Bytes: ");
+//    for(int i=0; i<32; i++) printf("%02X ", blob_ptr[i]);
+//    printf("\n");
+//    if(blob_ptr[0] == 0xE9) {
+//        int32_t rel = *reinterpret_cast<int32_t*>(blob_ptr + 1);
+//        printf("DEBUG: Thunk detected! JMP relative %d. Target: %p\n", rel, blob_ptr + 5 + rel);
+//    }
+//
+//    if (argc >= 4) {
+//        std::string input_pe = argv[1];
+//        std::string output_pe = argv[2];
+//        uint32_t rva = 0;
+//        uint32_t size = 0x50;
+//
+//        try {
+//            std::string mode_or_rva = argv[3];
+//            if (mode_or_rva == "auto" || mode_or_rva == "markers") {
+//                size = 0;
+//            } else {
+//                rva = std::stoul(mode_or_rva, nullptr, 16);
+//                if (argc >= 5) {
+//                    size = std::stoul(argv[4], nullptr, 16);
+//                }
+//            }
+//
+//            printf("Virtualizing %s -> %s\n", input_pe.c_str(), output_pe.c_str());
+//            if (rva == 0 && size == 0) {
+//                printf("Target mode: marker scan\n");
+//            } else {
+//                printf("Target Function RVA: 0x%X, Size: 0x%X\n", rva, size);
+//            }
+//
+//            pe_patcher patcher(input_pe, output_pe, rva, size);
+//        }
+//        catch (const std::exception& e) {
+//            printf("Error: %s\n", e.what());
+//            return 1;
+//        }
+//    }
+//    else {
+//        printf("Usage: nocturne.exe <input_pe> <output_pe> <rva_hex> [size_hex]\n");
+//        printf("   or: nocturne.exe <input_pe> <output_pe> auto\n");
+//        printf("Running internal tests...\n");
+//        test_advanced_features();
+//    }
+//    return 0;
+//}
 

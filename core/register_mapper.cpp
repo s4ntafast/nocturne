@@ -34,7 +34,3 @@ uint8_t register_mapper::get_vm_register(ZydisRegister x86_reg) {
 
     return 0;
 }
-
-
-
-

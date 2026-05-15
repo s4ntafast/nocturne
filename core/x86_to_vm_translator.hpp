@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <cstdint>
 #include <array>
 #include <Zydis/Zydis.h>
@@ -81,5 +80,3 @@ private:
     uint32_t internal_label_counter = 0;
     uint64_t function_end_address = 0;
 };
-
-

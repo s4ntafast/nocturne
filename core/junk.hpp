@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-//#define DEBUG_MODE
+#define DEBUG_MODE
 #define VM_BLOB_CODE_SECTION ".vmb$code"
 
 constexpr uint64_t get_seed() {

@@ -1078,8 +1078,4 @@ extern "C" __declspec(noinline) __declspec(safebuffers) void run_vm_from_blob(
     run_vm_logic<false>(*vm);
 }
 
-extern "C" __declspec(noinline) void run_advanced_vm_end_marker() {
-    volatile int x = 0;
-}
-
 #pragma code_seg(pop)

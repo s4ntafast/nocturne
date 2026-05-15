@@ -19,7 +19,3 @@ extern "C" void vm_reset_state(vm_state& vm);
 
 extern "C" __declspec(noinline) void run_advanced_vm(vm_state& vm);
 
-extern "C" __declspec(noinline) void run_advanced_vm_end_marker();
-
-
-
