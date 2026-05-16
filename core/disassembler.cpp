@@ -139,6 +139,11 @@ void disassembler::dump_vm_bytecode(const uint8_t* code, size_t length, const ch
             offset += 4;
             break;
         }
+        case op_nop: {
+            printf("NOP\n");
+            offset++;
+            break;
+        }
         case op_sar: {
             if (offset + 4 > length) goto invalid;
             printf("%02X %02X %02X   SAR r%u, r%u, r%u\n",

@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
         }
     }
     else {
-        printf("Usage: nocturne.exe <input_pe> <output_pe> <rva_hex> [size_hex]\n");
-        printf("   or: nocturne.exe <input_pe> <output_pe> auto\n");
+        printf("Usage: cli.exe <input_pe> <output_pe> <rva_hex> [size_hex]\n");
+        printf("   or: cli.exe <input_pe> <output_pe> auto\n");
     }
     return 0;
 }
