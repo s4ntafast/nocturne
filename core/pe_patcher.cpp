@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "pe_patcher.hpp"
-#include "assembly_dumper.hpp"
-#include "x86_to_vm_translator.hpp"
+#include "disassembler.hpp"
+#include "x86_translator.hpp"
 #include "vm_interpreter.hpp"
 #include "pdb.hpp"
 
@@ -422,7 +422,7 @@ bool pe_patcher::virtualize_region(uint32_t target_rva, uint32_t target_size, ui
     std::vector<uint8_t> opcodes = get_code_at_rva(target_rva, target_rva + target_size);
     std::println("Extracted {} bytes", opcodes.size());
     
-    assembly_dumper dumper;
+    disassembler dumper;
     dumper.dump_x86_assembly(opcodes.data(), opcodes.size(), "assembly dump");
 
     auto vm = std::make_unique<vm_state>();
@@ -431,7 +431,7 @@ bool pe_patcher::virtualize_region(uint32_t target_rva, uint32_t target_size, ui
     vm_initialize_state(*vm, vm_code_buffer.data(), static_cast<uint32_t>(vm_code_buffer.size()), vm_memory_buffer.data(), static_cast<uint32_t>(vm_memory_buffer.size()));
     
     uint64_t base_address = image_base + target_rva;
-    advanced_x86_to_vm_translator translator(*vm, base_address, image_base, image_size);
+    x86_translator translator(*vm, base_address, image_base, image_size);
     
     if (!translator.translate_function(opcodes.data(), opcodes.size())) {
         std::println("Translator failed to process target function.");

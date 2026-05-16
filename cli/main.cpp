@@ -5,8 +5,8 @@
 #include <string>
 
 #include "core/common.hpp"
-#include "core/assembly_dumper.hpp"
-#include "core/x86_to_vm_translator.hpp"
+#include "core/disassembler.hpp"
+#include "core/x86_translator.hpp"
 #include "core/vm_interpreter.hpp"
 #include "core/pe_patcher.hpp"
 

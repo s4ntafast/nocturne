@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "common.hpp"
 
 extern "C" __declspec(noinline) void run_vm_from_blob(
@@ -18,4 +17,3 @@ extern "C" void vm_initialize_state(vm_state& vm, uint8_t* code_buffer, uint32_t
 extern "C" void vm_reset_state(vm_state& vm);
 
 extern "C" __declspec(noinline) void run_advanced_vm(vm_state& vm);
-

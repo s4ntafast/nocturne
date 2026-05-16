@@ -7,7 +7,7 @@
 #include "register_mapper.hpp"
 #include "vm_builder.hpp"
 
-class advanced_x86_to_vm_translator {
+class x86_translator {
 private:
     register_mapper reg_mapper;
     vm_builder builder;
@@ -18,7 +18,7 @@ private:
     std::array<bool, 16> xmm_known_zero{};
 
 public:
-    advanced_x86_to_vm_translator(vm_state& vm, uint64_t base_addr = 0x400000, uint64_t image_base_addr = 0, uint32_t image_size_bytes = 0);
+    x86_translator(vm_state& vm, uint64_t base_addr = 0x400000, uint64_t image_base_addr = 0, uint32_t image_size_bytes = 0);
     bool translate_function(const uint8_t* x86_code, size_t code_size);
 
 private:
@@ -49,6 +49,7 @@ private:
     bool translate_inc(const ZydisDecodedOperand* operands);
     bool translate_dec(const ZydisDecodedOperand* operands);
     bool translate_cdq();
+    bool translate_nop();
     bool translate_lea(const ZydisDecodedInstruction* instruction,
         const ZydisDecodedOperand* operands, uint64_t current_addr);
     bool translate_call(const ZydisDecodedInstruction* instruction,

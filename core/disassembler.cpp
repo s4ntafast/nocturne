@@ -1,14 +1,14 @@
-#include "assembly_dumper.hpp"
+#include "disassembler.hpp"
 #include "common.hpp"
 #include <iostream>
 #include <cstring>
 
-assembly_dumper::assembly_dumper() {
+disassembler::disassembler() {
     ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
     ZydisFormatterInit(&formatter, ZYDIS_FORMATTER_STYLE_INTEL);
 }
 
-void assembly_dumper::dump_x86_assembly(const uint8_t* code, size_t length, const char* title) {
+void disassembler::dump_x86_assembly(const uint8_t* code, size_t length, const char* title) {
     printf("\n=== %s ===\n", title);
 
     size_t offset = 0;
@@ -43,7 +43,7 @@ void assembly_dumper::dump_x86_assembly(const uint8_t* code, size_t length, cons
     printf("========================================\n");
 }
 
-void assembly_dumper::dump_vm_bytecode(const uint8_t* code, size_t length, const char* title) {
+void disassembler::dump_vm_bytecode(const uint8_t* code, size_t length, const char* title) {
     printf("\n=== %s ===\n", title);
 
     size_t offset = 0;

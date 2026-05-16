@@ -102,6 +102,7 @@ void vm_builder::emit_call_native(uint64_t target_va) { emit_u8(op_call_native);
 void vm_builder::emit_call_native_indirect(uint64_t target_slot_va) { emit_u8(op_call_native_indirect); emit_u64(target_slot_va); }
 void vm_builder::emit_call_native_mem(uint8_t base, int32_t offset) { emit_u8(op_call_native_mem); emit_u8(base); emit_i32(offset); }
 void vm_builder::emit_call_native_reg(uint8_t target) { emit_u8(op_call_native_reg); emit_u8(target); }
+void vm_builder::emit_nop() { emit_u8(op_nop); }
 void vm_builder::emit_ret() { emit_u8(op_ret); }
 void vm_builder::emit_halt() { emit_u8(op_halt); }
 

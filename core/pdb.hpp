@@ -1,5 +1,10 @@
 #pragma once
 
+/*
+	old pdb parsing util
+	TODO: implement support for virtualzing functions by name
+*/
+
 #include <string>
 #include <vector>
 

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="assembly_dumper.cpp">
+    <ClCompile Include="disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="register_mapper.cpp">
@@ -27,7 +27,7 @@
     <ClCompile Include="vm_interpreter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="x86_to_vm_translator.cpp">
+    <ClCompile Include="x86_translator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pe_patcher.cpp">
@@ -38,7 +38,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assembly_dumper.hpp">
+    <ClInclude Include="disassembler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common.hpp">
@@ -53,7 +53,7 @@
     <ClInclude Include="vm_interpreter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="x86_to_vm_translator.hpp">
+    <ClInclude Include="x86_translator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pe_patcher.hpp">

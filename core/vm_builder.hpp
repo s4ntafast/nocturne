@@ -44,6 +44,7 @@ public:
     void emit_call_native_indirect(uint64_t target_slot_va);
     void emit_call_native_mem(uint8_t base, int32_t offset);
     void emit_call_native_reg(uint8_t target);
+    void emit_nop();
     void emit_ret();
     void emit_halt();
 

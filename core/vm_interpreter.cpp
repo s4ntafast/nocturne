@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdarg>
+#include <Windows.h>
 #include <intrin.h>
 
 #pragma section(".vmb$a", read, execute)
@@ -68,9 +69,9 @@ vm_inline void vm_trace_helper(const char* fmt, ...) {
 namespace {
     constexpr uint8_t VM_REG_INDEX_RSP = 7;
     constexpr uint8_t VM_REG_INDEX_RBP = 6;
-    constexpr uint16_t IMAGE_DOS_SIGNATURE = 0x5A4D; // MZ
-    constexpr uint32_t IMAGE_NT_SIGNATURE = 0x00004550; // PE\0\0
-    constexpr uint16_t IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20B;
+   // constexpr uint16_t IMAGE_DOS_SIGNATURE = 0x5A4D; // MZ
+   // constexpr uint32_t IMAGE_NT_SIGNATURE = 0x00004550; // PE\0\0
+   // constexpr uint16_t IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20B;
 
     __declspec(noinline) void zero_u64_array(uint64_t* buffer, uint32_t count) {
         if (!buffer) {
@@ -990,6 +991,8 @@ static vm_inline void run_vm_logic(vm_state& vm) {
                         }
                     }
             }
+            break;
+        case op_nop:
             break;
         case op_call_native_reg:
             if (!ensure_code_bytes(vm, vm.ip, 1)) { vm.halted = true; }

@@ -1,4 +1,4 @@
-#include "x86_to_vm_translator.hpp"
+#include "x86_translator.hpp"
 #include <iostream>
 #include <cstring>
 
@@ -11,16 +11,16 @@ namespace {
     }
 }
 
-advanced_x86_to_vm_translator::advanced_x86_to_vm_translator(vm_state& vm, uint64_t base_addr, uint64_t image_base_addr, uint32_t image_size_bytes)
+x86_translator::x86_translator(vm_state& vm, uint64_t base_addr, uint64_t image_base_addr, uint32_t image_size_bytes)
     : builder(vm), base_address(base_addr), image_base(image_base_addr), image_size(image_size_bytes) {
     ZydisDecoderInit(&decoder, ZYDIS_MACHINE_MODE_LONG_64, ZYDIS_STACK_WIDTH_64);
 }
 
-uint64_t advanced_x86_to_vm_translator::alloc_internal_label() {
+uint64_t x86_translator::alloc_internal_label() {
     return internal_label_base + internal_label_counter++;
 }
 
-bool advanced_x86_to_vm_translator::translate_function(const uint8_t* x86_code, size_t code_size) {
+bool x86_translator::translate_function(const uint8_t* x86_code, size_t code_size) {
     printf("Starting advanced translation (%zu bytes)...\n", code_size);
     function_end_address = base_address + code_size;
 
@@ -62,7 +62,7 @@ bool advanced_x86_to_vm_translator::translate_function(const uint8_t* x86_code, 
     return true;
 }
 
-void advanced_x86_to_vm_translator::find_jump_targets(const uint8_t* x86_code, size_t code_size) {
+void x86_translator::find_jump_targets(const uint8_t* x86_code, size_t code_size) {
     size_t offset = 0;
     ZydisDecodedInstruction instruction;
     ZydisDecodedOperand operands[ZYDIS_MAX_OPERAND_COUNT];
@@ -95,7 +95,7 @@ void advanced_x86_to_vm_translator::find_jump_targets(const uint8_t* x86_code, s
     }
 }
 
-bool advanced_x86_to_vm_translator::translate_instruction(const ZydisDecodedInstruction* instruction,
+bool x86_translator::translate_instruction(const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands, uint64_t current_addr) {
     switch (instruction->mnemonic) {
     case ZYDIS_MNEMONIC_MOV: return translate_mov(instruction, operands, current_addr);
@@ -142,7 +142,7 @@ bool advanced_x86_to_vm_translator::translate_instruction(const ZydisDecodedInst
     case ZYDIS_MNEMONIC_JNBE: return translate_jump(instruction, operands, current_addr, op_jg);
     case ZYDIS_MNEMONIC_JNL: return translate_jump(instruction, operands, current_addr, op_jge);
     case ZYDIS_MNEMONIC_JNLE: return translate_jump(instruction, operands, current_addr, op_jg);
-    case ZYDIS_MNEMONIC_NOP:
+    case ZYDIS_MNEMONIC_NOP: return translate_nop();
     case ZYDIS_MNEMONIC_INT3:
     case ZYDIS_MNEMONIC_INT:
         return true;
@@ -153,7 +153,7 @@ bool advanced_x86_to_vm_translator::translate_instruction(const ZydisDecodedInst
     }
 }
 
-bool advanced_x86_to_vm_translator::get_image_relative_or_absolute(uint64_t target, uint64_t& encoded) const {
+bool x86_translator::get_image_relative_or_absolute(uint64_t target, uint64_t& encoded) const {
     if (image_base != 0 && image_size != 0 && target >= image_base && target < (image_base + image_size)) {
         encoded = target - image_base;
     } else {
@@ -162,7 +162,12 @@ bool advanced_x86_to_vm_translator::get_image_relative_or_absolute(uint64_t targ
     return true;
 }
 
-bool advanced_x86_to_vm_translator::resolve_memory_address(
+bool x86_translator::translate_nop() {
+    builder.emit_nop();
+    return true;
+}
+
+bool x86_translator::resolve_memory_address(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operand,
     uint64_t current_addr,
@@ -202,7 +207,7 @@ bool advanced_x86_to_vm_translator::resolve_memory_address(
     return true;
 }
 
-bool advanced_x86_to_vm_translator::emit_load_from_memory(
+bool x86_translator::emit_load_from_memory(
     uint8_t dst,
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operand,
@@ -217,7 +222,7 @@ bool advanced_x86_to_vm_translator::emit_load_from_memory(
     return true;
 }
 
-bool advanced_x86_to_vm_translator::emit_store_to_memory(
+bool x86_translator::emit_store_to_memory(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operand,
     uint64_t current_addr,
@@ -237,7 +242,7 @@ bool advanced_x86_to_vm_translator::emit_store_to_memory(
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_mov(
+bool x86_translator::translate_mov(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -307,7 +312,7 @@ bool advanced_x86_to_vm_translator::translate_mov(
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_add(
+bool x86_translator::translate_add(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -366,7 +371,7 @@ bool advanced_x86_to_vm_translator::translate_add(
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_and(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_and(const ZydisDecodedOperand* operands) {
     constexpr uint8_t temp_reg = vm_scratch_register;
 
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
@@ -404,7 +409,7 @@ bool advanced_x86_to_vm_translator::translate_and(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_or(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_or(const ZydisDecodedOperand* operands) {
     constexpr uint8_t temp_reg = vm_scratch_register;
 
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
@@ -442,7 +447,7 @@ bool advanced_x86_to_vm_translator::translate_or(const ZydisDecodedOperand* oper
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_xor(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_xor(const ZydisDecodedOperand* operands) {
     constexpr uint8_t temp_reg = vm_scratch_register;
 
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
@@ -480,7 +485,7 @@ bool advanced_x86_to_vm_translator::translate_xor(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_not(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_not(const ZydisDecodedOperand* operands) {
     constexpr uint8_t temp_reg = vm_scratch_register;
 
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER) {
@@ -506,7 +511,7 @@ bool advanced_x86_to_vm_translator::translate_not(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_test(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_test(const ZydisDecodedOperand* operands) {
     constexpr uint8_t temp_reg = vm_scratch_register;
     constexpr uint8_t zero_reg = vm_scratch_register - 1;
 
@@ -577,7 +582,7 @@ bool advanced_x86_to_vm_translator::translate_test(const ZydisDecodedOperand* op
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_imul(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_imul(const ZydisDecodedOperand* operands) {
     constexpr uint8_t temp1 = vm_scratch_register;
     constexpr uint8_t temp2 = vm_scratch_register - 1;
 
@@ -624,7 +629,7 @@ bool advanced_x86_to_vm_translator::translate_imul(const ZydisDecodedOperand* op
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_shift(const ZydisDecodedOperand* operands, uint8_t op) {
+bool x86_translator::translate_shift(const ZydisDecodedOperand* operands, uint8_t op) {
     constexpr uint8_t temp_reg = vm_scratch_register;
 
     if (operands[0].type != ZYDIS_OPERAND_TYPE_REGISTER) {
@@ -655,7 +660,7 @@ bool advanced_x86_to_vm_translator::translate_shift(const ZydisDecodedOperand* o
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_sub(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_sub(const ZydisDecodedOperand* operands) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
         operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER) {
         uint8_t dst = reg_mapper.get_vm_register(operands[0].reg.value);
@@ -675,7 +680,7 @@ bool advanced_x86_to_vm_translator::translate_sub(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_cmp(
+bool x86_translator::translate_cmp(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -726,7 +731,7 @@ bool advanced_x86_to_vm_translator::translate_cmp(
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_cmpxchg(
+bool x86_translator::translate_cmpxchg(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -748,7 +753,7 @@ bool advanced_x86_to_vm_translator::translate_cmpxchg(
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_xchg(
+bool x86_translator::translate_xchg(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -781,7 +786,7 @@ bool advanced_x86_to_vm_translator::translate_xchg(
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_push(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_push(const ZydisDecodedOperand* operands) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER) {
         uint8_t src = reg_mapper.get_vm_register(operands[0].reg.value);
         builder.emit_push(src);
@@ -790,7 +795,7 @@ bool advanced_x86_to_vm_translator::translate_push(const ZydisDecodedOperand* op
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_inc(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_inc(const ZydisDecodedOperand* operands) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER) {
         uint8_t dst = reg_mapper.get_vm_register(operands[0].reg.value);
 
@@ -804,7 +809,7 @@ bool advanced_x86_to_vm_translator::translate_inc(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_dec(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_dec(const ZydisDecodedOperand* operands) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER) {
         uint8_t dst = reg_mapper.get_vm_register(operands[0].reg.value);
 
@@ -818,7 +823,7 @@ bool advanced_x86_to_vm_translator::translate_dec(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_cdq() {
+bool x86_translator::translate_cdq() {
     uint8_t rax = reg_mapper.get_vm_register(ZYDIS_REGISTER_RAX);
     uint8_t rdx = reg_mapper.get_vm_register(ZYDIS_REGISTER_RDX);
     constexpr uint8_t scratch = vm_scratch_register;
@@ -840,7 +845,7 @@ bool advanced_x86_to_vm_translator::translate_cdq() {
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_lea(const ZydisDecodedInstruction* instruction,
+bool x86_translator::translate_lea(const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands, uint64_t current_addr) {
     if (operands[0].type != ZYDIS_OPERAND_TYPE_REGISTER ||
         operands[1].type != ZYDIS_OPERAND_TYPE_MEMORY) {
@@ -901,7 +906,7 @@ bool advanced_x86_to_vm_translator::translate_lea(const ZydisDecodedInstruction*
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_pop(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_pop(const ZydisDecodedOperand* operands) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER) {
         uint8_t dst = reg_mapper.get_vm_register(operands[0].reg.value);
         builder.emit_pop(dst);
@@ -910,7 +915,7 @@ bool advanced_x86_to_vm_translator::translate_pop(const ZydisDecodedOperand* ope
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_call(const ZydisDecodedInstruction* instruction,
+bool x86_translator::translate_call(const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands, uint64_t current_addr) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_IMMEDIATE) {
         uint64_t target;
@@ -958,7 +963,7 @@ bool advanced_x86_to_vm_translator::translate_call(const ZydisDecodedInstruction
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_xorps(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_xorps(const ZydisDecodedOperand* operands) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_REGISTER &&
         operands[1].type == ZYDIS_OPERAND_TYPE_REGISTER &&
         operands[0].reg.value == operands[1].reg.value) {
@@ -971,7 +976,7 @@ bool advanced_x86_to_vm_translator::translate_xorps(const ZydisDecodedOperand* o
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_movdqa(
+bool x86_translator::translate_movdqa(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -992,7 +997,7 @@ bool advanced_x86_to_vm_translator::translate_movdqa(
     return false;
 }
 
-bool advanced_x86_to_vm_translator::translate_movzx(
+bool x86_translator::translate_movzx(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -1018,7 +1023,7 @@ bool advanced_x86_to_vm_translator::translate_movzx(
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_movsx(
+bool x86_translator::translate_movsx(
     const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands,
     uint64_t current_addr) {
@@ -1061,7 +1066,7 @@ bool advanced_x86_to_vm_translator::translate_movsx(
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_cmovnz(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_cmovnz(const ZydisDecodedOperand* operands) {
     if (operands[0].type != ZYDIS_OPERAND_TYPE_REGISTER ||
         operands[1].type != ZYDIS_OPERAND_TYPE_REGISTER) {
         return false;
@@ -1081,7 +1086,7 @@ bool advanced_x86_to_vm_translator::translate_cmovnz(const ZydisDecodedOperand* 
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_setnz(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_setnz(const ZydisDecodedOperand* operands) {
     if (operands[0].type != ZYDIS_OPERAND_TYPE_REGISTER) {
         return false;
     }
@@ -1098,7 +1103,7 @@ bool advanced_x86_to_vm_translator::translate_setnz(const ZydisDecodedOperand* o
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_setz(const ZydisDecodedOperand* operands) {
+bool x86_translator::translate_setz(const ZydisDecodedOperand* operands) {
     if (operands[0].type != ZYDIS_OPERAND_TYPE_REGISTER) {
         return false;
     }
@@ -1115,7 +1120,7 @@ bool advanced_x86_to_vm_translator::translate_setz(const ZydisDecodedOperand* op
     return true;
 }
 
-bool advanced_x86_to_vm_translator::translate_jump(const ZydisDecodedInstruction* instruction,
+bool x86_translator::translate_jump(const ZydisDecodedInstruction* instruction,
     const ZydisDecodedOperand* operands, uint64_t current_addr,
     uint8_t vm_jump_type) {
     if (operands[0].type == ZYDIS_OPERAND_TYPE_IMMEDIATE) {

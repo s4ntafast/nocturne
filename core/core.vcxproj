@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="assembly_dumper.cpp" />
+    <ClCompile Include="disassembler.cpp" />
     <ClCompile Include="pdb.cpp" />
     <ClCompile Include="pe_patcher.cpp" />
     <ClCompile Include="register_mapper.cpp" />
@@ -35,10 +35,10 @@
       <SupportJustMyCode>false</SupportJustMyCode>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
-    <ClCompile Include="x86_to_vm_translator.cpp" />
+    <ClCompile Include="x86_translator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assembly_dumper.hpp" />
+    <ClInclude Include="disassembler.hpp" />
     <ClInclude Include="common.hpp" />
     <ClInclude Include="junk.hpp" />
     <ClInclude Include="nocturne_sdk.hpp" />
@@ -47,7 +47,7 @@
     <ClInclude Include="register_mapper.hpp" />
     <ClInclude Include="vm_builder.hpp" />
     <ClInclude Include="vm_interpreter.hpp" />
-    <ClInclude Include="x86_to_vm_translator.hpp" />
+    <ClInclude Include="x86_translator.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

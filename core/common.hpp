@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <cstdint>
 #include <cstddef>
 
@@ -30,6 +29,7 @@ struct vm_state {
     uint32_t chunked_code_blob_size;
     uint32_t chunk_count;
 };
+
 enum opcode_t : uint8_t {
     op_nop = 0x00,
     op_mov_imm = 0x01,
@@ -70,8 +70,3 @@ enum opcode_t : uint8_t {
     op_ret = 0x41,
     op_halt = 0xFF
 };
-
-
-
-
-
