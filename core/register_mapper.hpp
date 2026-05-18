@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <cstdint>
 #include <map>
 #include <Zydis/Zydis.h>
@@ -13,6 +12,3 @@ public:
     register_mapper();
     uint8_t get_vm_register(ZydisRegister x86_reg);
 };
-
-
-

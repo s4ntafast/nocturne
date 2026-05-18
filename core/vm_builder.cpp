@@ -1,14 +1,6 @@
 #include "vm_builder.hpp"
+#include "byte_io.hpp"
 #include <iostream>
-
-namespace {
-    inline void write_i32_le(uint8_t* ptr, int32_t value) {
-        ptr[0] = static_cast<uint8_t>(value & 0xFF);
-        ptr[1] = static_cast<uint8_t>((value >> 8) & 0xFF);
-        ptr[2] = static_cast<uint8_t>((value >> 16) & 0xFF);
-        ptr[3] = static_cast<uint8_t>((value >> 24) & 0xFF);
-    }
-}
 
 vm_builder::vm_builder(vm_state& vm_state) : vm(vm_state) {
     vm.ip = 0;
@@ -71,7 +63,7 @@ void vm_builder::resolve_jumps() {
             uint32_t jump_from = vm_pos + 4;
             int32_t offset = static_cast<int32_t>(it->second) - static_cast<int32_t>(jump_from);
             if (vm.code && (vm_pos + 4) <= vm.code_capacity) {
-                write_i32_le(vm.code + vm_pos, offset);
+                byte_io::write_i32_le(vm.code + vm_pos, offset);
             }
             printf("Resolved jump: VM pos %u -> target %u (from %u, offset %+d)\n",
                 vm_pos, it->second, jump_from, offset);

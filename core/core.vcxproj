@@ -20,8 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="disassembler.cpp" />
+    <ClCompile Include="handler.cpp" />
     <ClCompile Include="pdb.cpp" />
-    <ClCompile Include="pe_patcher.cpp" />
+    <ClCompile Include="patcher.cpp" />
+    <ClCompile Include="pe_utils.cpp" />
+    <ClCompile Include="pe_rewriter.cpp" />
     <ClCompile Include="register_mapper.cpp" />
     <ClCompile Include="vm_builder.cpp" />
     <ClCompile Include="vm_interpreter.cpp">
@@ -38,15 +41,22 @@
     <ClCompile Include="x86_translator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alignment.hpp" />
+    <ClInclude Include="byte_io.hpp" />
     <ClInclude Include="disassembler.hpp" />
     <ClInclude Include="common.hpp" />
+    <ClInclude Include="handler_impl.hpp" />
+    <ClInclude Include="handler.hpp" />
     <ClInclude Include="junk.hpp" />
     <ClInclude Include="nocturne_sdk.hpp" />
     <ClInclude Include="pdb.hpp" />
-    <ClInclude Include="pe_patcher.hpp" />
+    <ClInclude Include="patcher.hpp" />
+    <ClInclude Include="pe_rewriter.hpp" />
+    <ClInclude Include="pe_utils.hpp" />
     <ClInclude Include="register_mapper.hpp" />
     <ClInclude Include="vm_builder.hpp" />
     <ClInclude Include="vm_interpreter.hpp" />
+    <ClInclude Include="vm_utils.hpp" />
     <ClInclude Include="x86_translator.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

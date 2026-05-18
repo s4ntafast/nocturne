@@ -13,60 +13,114 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\vm">
+      <UniqueIdentifier>{a4699ada-b47e-467d-b0bf-2bb6072de5dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vm">
+      <UniqueIdentifier>{d3979b4a-93ab-406b-827a-a9ea9c010a81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pe">
+      <UniqueIdentifier>{a6d86d2d-c15c-428f-9d72-7a84af355ce4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pe">
+      <UniqueIdentifier>{3f34d87e-930b-486a-aa5d-d6619179eaa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\asm">
+      <UniqueIdentifier>{9f7a01ba-fad3-4d16-90e2-a7862bd08b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\asm">
+      <UniqueIdentifier>{69ab8eea-906f-493d-aa84-eb9001b9b1fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{2c786c80-cc3e-411a-97e3-bbf1449a6709}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\obfuscation">
+      <UniqueIdentifier>{4c996c0a-bcd7-47a6-8f7c-fc756f88fb3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="disassembler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="register_mapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="vm_builder.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vm</Filter>
     </ClCompile>
     <ClCompile Include="vm_interpreter.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\vm</Filter>
     </ClCompile>
-    <ClCompile Include="x86_translator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pe_patcher.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="patcher.cpp">
+      <Filter>Source Files\pe</Filter>
     </ClCompile>
     <ClCompile Include="pdb.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\pe</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_rewriter.cpp">
+      <Filter>Source Files\pe</Filter>
+    </ClCompile>
+    <ClCompile Include="pe_utils.cpp">
+      <Filter>Source Files\pe</Filter>
+    </ClCompile>
+    <ClCompile Include="x86_translator.cpp">
+      <Filter>Source Files\asm</Filter>
+    </ClCompile>
+    <ClCompile Include="register_mapper.cpp">
+      <Filter>Source Files\asm</Filter>
+    </ClCompile>
+    <ClCompile Include="disassembler.cpp">
+      <Filter>Source Files\asm</Filter>
+    </ClCompile>
+    <ClCompile Include="handler.cpp">
+      <Filter>Source Files\vm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="disassembler.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="register_mapper.hpp">
+    <ClInclude Include="nocturne_sdk.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vm_builder.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vm</Filter>
     </ClInclude>
     <ClInclude Include="vm_interpreter.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\vm</Filter>
     </ClInclude>
-    <ClInclude Include="x86_translator.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="vm_utils.hpp">
+      <Filter>Header Files\vm</Filter>
     </ClInclude>
-    <ClInclude Include="pe_patcher.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="handler.hpp">
+      <Filter>Header Files\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="handler_impl.hpp">
+      <Filter>Header Files\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_utils.hpp">
+      <Filter>Header Files\pe</Filter>
+    </ClInclude>
+    <ClInclude Include="pe_rewriter.hpp">
+      <Filter>Header Files\pe</Filter>
     </ClInclude>
     <ClInclude Include="pdb.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\pe</Filter>
+    </ClInclude>
+    <ClInclude Include="patcher.hpp">
+      <Filter>Header Files\pe</Filter>
+    </ClInclude>
+    <ClInclude Include="register_mapper.hpp">
+      <Filter>Header Files\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="x86_translator.hpp">
+      <Filter>Header Files\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="disassembler.hpp">
+      <Filter>Header Files\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="alignment.hpp">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="byte_io.hpp">
+      <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="junk.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\obfuscation</Filter>
     </ClInclude>
-    <ClInclude Include="nocturne_sdk.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="common.hpp">
+      <Filter>Header Files\vm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

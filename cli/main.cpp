@@ -8,7 +8,7 @@
 #include "core/disassembler.hpp"
 #include "core/x86_translator.hpp"
 #include "core/vm_interpreter.hpp"
-#include "core/pe_patcher.hpp"
+#include "core/patcher.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc >= 4) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
                 printf("Target Function RVA: 0x%X, Size: 0x%X\n", rva, size);
             }
 
-            pe_patcher patcher(input_pe, output_pe, rva, size);
+            patcher binary_patcher(input_pe, output_pe, rva, size);
         }
         catch (const std::exception& e) {
             printf("Error: %s\n", e.what());

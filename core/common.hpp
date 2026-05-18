@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <array>
+#include <random>
 
 constexpr size_t vm_register_count = 32;
 constexpr uint8_t vm_scratch_register = 31;
@@ -30,43 +32,56 @@ struct vm_state {
     uint32_t chunk_count;
 };
 
+struct vm_flags {
+    bool zf  = false; // zero flag
+    bool pf  = false; // parity flag
+    bool af  = false; // auxiliary flag
+    bool of  = false; // overflow flag
+    bool sf  = false; // sign flag
+    bool df  = false; // direction flag
+    bool cf  = false; // carry flag
+    bool tf  = false; // trap flag
+    bool ief = false; // interrupt-enable flag
+};
+
 enum opcode_t : uint8_t {
-    op_nop = 0x00,
-    op_mov_imm = 0x01,
-    op_add = 0x02,
-    op_sub = 0x03,
-    op_mul = 0x04,
-    op_div = 0x05,
-    op_load_mem = 0x06,
-    op_store_mem = 0x07,
-    op_mov_reg = 0x08,
-    op_and = 0x09,
-    op_or = 0x0A,
-    op_xor = 0x0B,
-    op_not = 0x0C,
-    op_shl = 0x0D,
-    op_shr = 0x0E,
-    op_sar = 0x0F,
-    op_call_native = 0x18,
-    op_store_mem8 = 0x19,
-    op_store_mem_zero128 = 0x1A,
-    op_call_native_indirect = 0x1B,
-    op_call_native_mem = 0x1C,
-    op_cmpxchg_mem64 = 0x1D,
-    op_call_native_reg = 0x1E,
-    op_xchg_mem64 = 0x1F,
-    op_jmp = 0x10,
-    op_jz = 0x11,
-    op_cmp = 0x12,
-    op_jnz = 0x13,
-    op_jl = 0x14,
-    op_jg = 0x15,
-    op_jle = 0x16,
-    op_jge = 0x17,
-    op_print = 0x20,
-    op_push = 0x30,
-    op_pop = 0x31,
-    op_call = 0x40,
-    op_ret = 0x41,
-    op_halt = 0xFF
+   op_nop = 0x00,
+   op_mov_imm = 0x01,
+   op_add = 0x02,
+   op_sub = 0x03,
+   op_mul = 0x04,
+   op_div = 0x05,
+   op_load_mem = 0x06,
+   op_store_mem = 0x07,
+   op_mov_reg = 0x08,
+   op_and = 0x09,
+   op_or = 0x0A,
+   op_xor = 0x0B,
+   op_not = 0x0C,
+   op_shl = 0x0D,
+   op_shr = 0x0E,
+   op_sar = 0x0F,
+   op_call_native = 0x18,
+   op_store_mem8 = 0x19,
+   op_store_mem_zero128 = 0x1A,
+   op_call_native_indirect = 0x1B,
+   op_call_native_mem = 0x1C,
+   op_cmpxchg_mem64 = 0x1D,
+   op_call_native_reg = 0x1E,
+   op_xchg_mem64 = 0x1F,
+   op_jmp = 0x10,
+   op_jz = 0x11,
+   op_cmp = 0x12,
+   op_jnz = 0x13,
+   op_jl = 0x14,
+   op_jg = 0x15,
+   op_jle = 0x16,
+   op_jge = 0x17,
+   op_print = 0x20,
+   op_push = 0x30,
+   op_pop = 0x31,
+   op_call = 0x40,
+   op_ret = 0x41,
+   op_halt = 0xFE,
+   opcode_size,
 };
