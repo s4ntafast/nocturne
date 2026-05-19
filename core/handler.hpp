@@ -1,9 +1,9 @@
 #pragma once
 
+#include <functional>
+
 #include "common.hpp"
 #include "vm_utils.hpp"
-
-using handler_t = bool(*)(vm_state& vm, vm_flags& flags);
 
 namespace handlers 
 {
