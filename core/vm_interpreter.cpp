@@ -175,12 +175,9 @@ vm_inline void vm_initialize_state_internal(vm_state& vm, uint8_t* code_buffer, 
     vm_reset_state_internal(vm);
 }
 
-/*
-    TODO: the dispatcher loop is now way too clean and too easy to reverse! gotta find a way to make it more obscure and awful
-*/
-
 template<bool trace_enabled>
 static vm_inline void run_vm_logic(vm_state& vm, vm_flags& flags) {
+    //vmenter
     generator<500>::generate_junk();
 
     if (!vm.code || vm.code_size == 0 || !vm.memory || vm.memory_size == 0) {
@@ -203,9 +200,7 @@ static vm_inline void run_vm_logic(vm_state& vm, vm_flags& flags) {
 
     int instruction_count = 0;
     const int MAX_INSTRUCTIONS = 1000000; 
-    handler_t handler_table[opcode_size]; //kepe this undeclared for now, msvc uses a memset, so we gotta keep it undeclared until i get relocations implemented and working
-    handlers::initialize_table(handler_table, opcode_size);
-
+ 
     generator<20>::generate_junk();
     while (!vm.halted && vm.ip < vm.code_size && instruction_count < MAX_INSTRUCTIONS) {
         generator<20>::generate_junk();
@@ -218,9 +213,121 @@ static vm_inline void run_vm_logic(vm_state& vm, vm_flags& flags) {
 
         ++instruction_count;
 
-        auto handler = handler_table[op];
-        if (!handler || !handler(vm, flags)) {
-            vm.halted = true;
+        switch (op) {
+        case op_nop: 
+            handlers::handle_nop(vm, flags);
+            break;
+        case op_mov_imm: 
+            handlers::handle_mov_imm(vm, flags);
+            break;
+        case op_add: 
+            handlers::handle_add(vm, flags);
+            break;
+        case op_sub:
+            handlers::handle_sub(vm, flags);
+            break;
+        case op_mul:
+            handlers::handle_mul(vm, flags);
+            break;
+        case op_div:
+            handlers::handle_div(vm, flags);
+            break;
+        case op_load_mem:
+            handlers::handle_load_mem(vm, flags);
+            break;
+        case op_store_mem:
+            handlers::handle_store_mem(vm, flags);
+            break;
+        case op_mov_reg:
+            handlers::handle_mov_reg(vm, flags);
+            break;
+        case op_and:
+            handlers::handle_and(vm, flags);
+            break;
+        case op_or:
+            handlers::handle_or(vm, flags);
+            break;
+        case op_xor:
+            handlers::handle_xor(vm, flags);
+            break;
+        case op_not:
+            handlers::handle_not(vm, flags);
+            break;
+        case op_shl:
+            handlers::handle_shl(vm, flags);
+            break;
+        case op_shr:
+            handlers::handle_shr(vm, flags);
+            break;
+        case op_sar:
+            handlers::handle_sar(vm, flags);
+            break;
+        case op_jmp:
+            handlers::handle_jmp(vm, flags);
+            break;
+        case op_jz:
+            handlers::handle_jz(vm, flags);
+            break;
+        case op_cmp:
+            handlers::handle_cmp(vm, flags);
+            break;
+        case op_jnz:
+            handlers::handle_jnz(vm, flags);
+            break;
+        case op_jl:
+            handlers::handle_jl(vm, flags);
+            break;
+        case op_jg:
+            handlers::handle_jg(vm, flags);
+            break;
+        case op_jle:
+            handlers::handle_jle(vm, flags);
+            break;
+        case op_jge:
+            handlers::handle_jge(vm, flags);
+            break;
+        case op_call_native:
+            handlers::handle_call_native(vm, flags);
+            break;
+        case op_store_mem8:
+            handlers::handle_store_mem8(vm, flags);
+            break;
+        case op_store_mem_zero128:
+            handlers::handle_store_mem_zero128(vm, flags);
+            break;
+        case op_call_native_indirect:
+            handlers::handle_call_native_indirect(vm, flags);
+            break;
+        case op_call_native_mem:
+            handlers::handle_call_native_mem(vm, flags);
+            break;
+        case op_cmpxchg_mem64:
+            handlers::handle_cmpxchg_mem64(vm, flags);
+            break;
+        case op_call_native_reg:
+            handlers::handle_call_native_reg(vm, flags);
+            break;
+        case op_xchg_mem64:
+            handlers::handle_xchg_mem64(vm, flags);
+            break;
+        case op_push:
+            handlers::handle_push(vm, flags);
+            break;
+        case op_pop:
+            handlers::handle_pop(vm, flags);
+            break;
+        case op_call:
+            handlers::handle_call(vm, flags);
+            break;
+        case op_ret:
+            handlers::handle_ret(vm, flags);
+            break;
+        case op_halt:
+            handlers::handle_halt(vm, flags);
+            break;
+        default:
+            handlers::handle_invalid(vm, flags);
+            break;
         }
 
         generator<10>::generate_junk();

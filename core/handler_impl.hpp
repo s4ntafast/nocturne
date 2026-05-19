@@ -285,10 +285,6 @@ vm_inline bool handlers::handle_not(vm_state& vm, UNUSED vm_flags& flags) {
     return true;
 }
 
-vm_inline bool handlers::hanlde_shl(vm_state& vm, vm_flags& flags) {
-    return handle_shl(vm, flags);
-}
-
 vm_inline bool handlers::handle_shr(vm_state& vm, UNUSED vm_flags& flags) {
     uint8_t dst = 0;
     uint8_t a = 0;
@@ -697,54 +693,6 @@ vm_inline bool handlers::handle_halt(vm_state& vm, UNUSED vm_flags& flags) {
 vm_inline bool handlers::handle_invalid(vm_state& vm, UNUSED vm_flags& flags) {
     vm.halted = true;
     return false;
-}
-
-vm_inline void handlers::initialize_table(handler_t* table, uint32_t table_size) {
-    if (!table || table_size <= op_halt) {
-        return;
-    }
-
-    for (uint32_t i = 0; i < table_size; ++i) {
-        table[i] = handle_invalid;
-    }
-
-    table[op_nop] = handle_nop;
-    table[op_mov_imm] = handle_mov_imm;
-    table[op_add] = handle_add;
-    table[op_sub] = handle_sub;
-    table[op_mul] = handle_mul;
-    table[op_div] = handle_div;
-    table[op_load_mem] = handle_load_mem;
-    table[op_store_mem] = handle_store_mem;
-    table[op_mov_reg] = handle_mov_reg;
-    table[op_and] = handle_and;
-    table[op_or] = handle_or;
-    table[op_xor] = handle_xor;
-    table[op_not] = handle_not;
-    table[op_shl] = handle_shl;
-    table[op_shr] = handle_shr;
-    table[op_sar] = handle_sar;
-    table[op_call_native] = handle_call_native;
-    table[op_store_mem8] = handle_store_mem8;
-    table[op_store_mem_zero128] = handle_store_mem_zero128;
-    table[op_call_native_indirect] = handle_call_native_indirect;
-    table[op_call_native_mem] = handle_call_native_mem;
-    table[op_cmpxchg_mem64] = handle_cmpxchg_mem64;
-    table[op_call_native_reg] = handle_call_native_reg;
-    table[op_xchg_mem64] = handle_xchg_mem64;
-    table[op_jmp] = handle_jmp;
-    table[op_jz] = handle_jz;
-    table[op_cmp] = handle_cmp;
-    table[op_jnz] = handle_jnz;
-    table[op_jl] = handle_jl;
-    table[op_jg] = handle_jg;
-    table[op_jle] = handle_jle;
-    table[op_jge] = handle_jge;
-    table[op_push] = handle_push;
-    table[op_pop] = handle_pop;
-    table[op_call] = handle_call;
-    table[op_ret] = handle_ret;
-    table[op_halt] = handle_halt;
 }
 
 #pragma code_seg(pop)

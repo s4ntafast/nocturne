@@ -21,7 +21,6 @@ namespace handlers
 	vm_inline bool handle_or(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_xor(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_not(vm_state& vm, vm_flags& flags);
-	vm_inline bool hanlde_shl(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_shl(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_shr(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_sar(vm_state& vm, vm_flags& flags);
@@ -47,5 +46,4 @@ namespace handlers
 	vm_inline bool handle_ret(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_halt(vm_state& vm, vm_flags& flags);
 	vm_inline bool handle_invalid(vm_state& vm, vm_flags& flags);
-	vm_inline void initialize_table(handler_t* table, uint32_t table_size);
 };
