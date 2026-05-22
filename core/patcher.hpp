@@ -10,7 +10,7 @@ class pe_rewriter;
 
 class patcher {
 public:
-    patcher(const std::string& input_path, const std::string& output, uint32_t target_rva = 0x1950, uint32_t target_size = 0x12);
+    patcher(const std::string& input_path, const std::string& output, uint32_t target_rva = 0x1950, uint32_t target_size = 0x12, const std::string& pdb_path = "");
     ~patcher();
 private:
     std::unique_ptr<LIEF::PE::Binary> pe;
@@ -18,6 +18,7 @@ private:
     std::unique_ptr<pe_rewriter> rewriter_;
     std::vector<uint8_t> bytecode;
     uint32_t bytecode_size_ = 0;
+    const std::string pdb_path_;
 
     std::vector<uint8_t> get_code_at_rva(uint32_t function_rva, uint32_t end_rva);
     std::vector<std::vector<uint8_t>> get_code_at_marker();

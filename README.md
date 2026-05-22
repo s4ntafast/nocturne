@@ -23,21 +23,40 @@ VIRTUALIZE int secret(int x) {
 }
 VIRTUALIZE_MARK(secret);
 ```
-Afterwards, run the virtualizer executable.
+Afterwards, run the cli executable.
 ```bash
-cli.exe <input.exe> <output.exe> auto
+cli.exe -i <input.exe> -o <output.exe>
 ```
 Example:
 ```bash
-cli.exe example.exe example_protected.exe auto
+cli.exe -i example.exe -o example_protected.exe
 ```
-Or, you if you want to virtualize specific segments of a binary without the SDK:
+By default, the CLI uses `auto` mode.
+
+Or, explicitly:
 ```bash
-cli.exe <input.exe> <output.exe> <start_rva> <function_size>
+cli.exe -i <input.exe> -o <output.exe> --mode auto
 ```
 Example:
 ```bash
-cli.exe calc.exe calc_vmp.exe 0x1600 0x264
+cli.exe -i example.exe -o example_protected.exe --mode auto
+```
+To scan for markers:
+
+```bash
+cli.exe -i <input.exe> -o <output.exe> --mode markers
+```
+Example:
+```bash
+cli.exe -i example.exe -o example_protected.exe --mode markers
+```
+Or, if you want to virtualize specific segments of a binary without the SDK:
+```bash
+cli.exe -i <input.exe> -o <output.exe> --mode rva <start_rva> <end_rva>
+```
+Example:
+```bash
+cli.exe -i calc.exe -o calc_vmp.exe --mode rva 0x1600 0x1864
 ```
 
 # Screenshots
@@ -56,6 +75,7 @@ Obfuscated dispatcher loop:
 ```
 LIEF
 Zydis
+argparse
 ```
 
 # Disclaimer

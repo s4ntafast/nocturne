@@ -158,10 +158,11 @@ static std::vector<uint8_t> build_chunked_bytecode_blob(const std::vector<uint8_
     return chunked;
 }
 
-patcher::patcher(const std::string& input_path, const std::string& output, uint32_t target_rva, uint32_t target_size)
+patcher::patcher(const std::string& input_path, const std::string& output, uint32_t target_rva, uint32_t target_size, const std::string& pdb_path)
     : pe(LIEF::PE::Parser::parse(input_path)),
       output_path(output),
-      rewriter_(std::make_unique<pe_rewriter>(*pe)) {
+      rewriter_(std::make_unique<pe_rewriter>(*pe)),
+      pdb_path_(pdb_path) {
 
     uint64_t image_base = pe->imagebase();
     uint32_t image_size = 0;
@@ -414,6 +415,8 @@ std::vector<std::pair<uint32_t, uint32_t>> patcher::grab_rvas_from_markers() {
 }
 
 std::vector<std::pair<uint32_t, uint32_t>> patcher::grab_rvas_from_pdb() {
+    std::println("pdb path: {}", pdb_path_);
+
     return { {} };
 }
 
