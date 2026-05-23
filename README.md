@@ -80,3 +80,5 @@ argparse
 
 # Disclaimer
 First and foremost, this is mostly a POC project. Please don't expect it to be **too** stable. With that being said, I will be progressively adding more features/fixes to this as time goes on.
+
+If there are any features / handlers you want implemented, I implore you to open an issue. I welcome any and all contributions.
